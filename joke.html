@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>💥 Ultimate 3D Joke Experience V2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        /* General Setup */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            color: #fff;
+            cursor: url('https://img.icons8.com/ios/452/neon-cursor.png'), auto;
+            overflow: hidden;
+        }
+
+        /* Parallax Background */
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2016/11/14/02/44/cat-1822601_960_720.jpg');
+            background-size: cover;
+            transform: translateZ(-3px) scale(4);
+            z-index: -3;
+            filter: brightness(0.4);
+        }
+
+        /* Particle Effect */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(0, 247, 255, 0.7);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: particleMove 3s infinite ease-out;
+        }
+
+        @keyframes particleMove {
+            0% {
+                transform: scale(0) translate3d(0, 0, 0);
+            }
+
+            100% {
+                transform: scale(1) translate3d(100px, 100px, 0);
+            }
+        }
+
+        /* Floating 3D Object Effect */
+        .floating-3d {
+            position: absolute;
+            background-color: rgba(0, 247, 255, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 247, 255, 0.8);
+            animation: float 7s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-50px) scale(1.1);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 3D Card Effect */
+        .container-3d {
+            perspective: 1500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card-3d {
+            transform-style: preserve-3d;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            z-index: 10;
+        }
+
+        .card-3d:hover {
+            box-shadow: 0 0 150px rgba(0, 247, 255, 1);
+        }
+
+        .card-content {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .cat-icon {
+            font-size: 4rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .btn-neon {
+            font-size: 1.2rem;
+            padding: 12px 28px;
+            background: transparent;
+            border: 2px solid #00f7ff;
+            color: #00f7ff;
+            text-shadow: 0 0 5px #00f7ff, 0 0 10px #00f7ff;
+            box-shadow: 0 0 25px rgba(0, 247, 255, 1);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-neon:hover {
+            background: #00f7ff;
+            color: #000;
+            box-shadow: 0 0 50px rgba(0, 247, 255, 1);
+            transform: scale(1.1);
+        }
+
+        #joke {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        #joke.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Audio Visualizer */
+        .visualizer {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 15;
+        }
+
+        .bar {
+            width: 10px;
+            height: 40px;
+            background: #00f7ff;
+            animation: pulse 1s infinite ease-in-out;
+            border-radius: 5px;
+            box-shadow: 0 0 15px #00f7ff;
+        }
+
+        .bar:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .bar:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .bar:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .bar:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(2.5);
+            }
+        }
+
+        /* Confetti Effect */
+        .confetti {
+            position: absolute;
+            background-color: rgba(255, 0, 255, 0.8);
+            width: 8px;
+            height: 15px;
+            opacity: 0.9;
+            animation: fall 3s infinite ease-out;
+            border-radius: 5px;
+        }
+
+        .confetti:nth-child(odd) {
+            background-color: #00f7ff;
+        }
+
+        .confetti:nth-child(even) {
+            background-color: #ff8c00;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .light-mode {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .light-mode .parallax-bg {
+            filter: brightness(1);
+        }
+
+        .light-mode .card-3d {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .light-mode .btn-neon {
+            color: #000;
+            background: #00f7ff;
+            border: 2px solid #00f7ff;
+            text-shadow: none;
+        }
+
+        .light-mode .visualizer .bar {
+            background: #ff9900;
+            box-shadow: 0 0 15px #ff9900;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-bg"></div>
+
+    <!-- Particle Effect -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Floating 3D Objects -->
+    <div id="floating-objects-container"></div>
+
+    <!-- 3D Card -->
+    <div class="container-3d">
+        <div class="card-3d tilt-card" id="tilt-card">
+            <div class="card-content">
+                <div class="cat-icon">🐱‍🚀</div>
+                <h1 class="fw-bold">The Ultimate Joke Experience</h1>
+                <p id="joke" class="lead">Ready for a random joke?</p>
+                <button class="btn btn-neon mt-4" onclick="getJoke()">✨ Get a Joke</button>
+                <button class="btn btn-neon mt-4" onclick="toggleTheme()">🌗 Toggle Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Visualizer -->
+    <div class="visualizer" id="visualizer" style="display: none;">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sound Effects -->
+    <audio class="sound-effect" id="joke-sound" src="https://www.soundjay.com/button/beep-07.wav"
+        preload="auto"></audio>
+
+    <script>
+        // Particle system (Improved with particle limit)
+        const maxParticles = 50;
+        let currentParticles = [];
+
+        function createParticle(event) {
+            if (currentParticles.length >= maxParticles) {
+                currentParticles[0].remove();
+                currentParticles.shift();
+            }
+            const particlesContainer = document.getElementById('particles');
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 10 + 5;
+            const posX = event.clientX + (Math.random() - 0.5) * 50;
+            const posY = event.clientY + (Math.random() - 0.5) * 50;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${posX}px`;
+            particle.style.top = `${posY}px`;
+            particlesContainer.appendChild(particle);
+
+            currentParticles.push(particle);
+
+            setTimeout(() => {
+                particle.remove();
+                currentParticles.shift();
+            }, 2000);
+        }
+
+        // 3D tilt effect
+        const tiltCard = document.getElementById("tilt-card");
+        document.addEventListener("mousemove", (e) => {
+            const x = e.clientX / window.innerWidth - 0.5;
+            const y = e.clientY / window.innerHeight - 0.5;
+            tiltCard.style.transform = `rotateY(${x * 15}deg) rotateX(${y * -15}deg) scale(1.05)`;
+            createParticle(e);
+        });
+
+        // Floating 3D Object Creation (Mobile optimization: Hidden on smaller devices)
+        function createFloatingObject() {
+            const objectContainer = document.getElementById('floating-objects-container');
+            const floatingObject = document.createElement('div');
+            floatingObject.classList.add('floating-3d');
+            const size = Math.random() * 50 + 30;
+            floatingObject.style.width = `${size}px`;
+            floatingObject.style.height = `${size}px`;
+            floatingObject.style.top = `${Math.random() * window.innerHeight}px`;
+            floatingObject.style.left = `${Math.random() * window.innerWidth}px`;
+            objectContainer.appendChild(floatingObject);
+
+            setTimeout(() => {
+                floatingObject.remove();
+            }, 7000);
+        }
+
+        setInterval(createFloatingObject, 2000);
+
+        // Fetch joke and trigger TTS + visualizer
+        function getJoke() {
+            const jokeElement = document.getElementById("joke");
+            const visualizer = document.getElementById("visualizer");
+            jokeElement.classList.remove("show");
+            visualizer.style.display = 'none';
+
+            fetch('https://v2.jokeapi.dev/joke/Any?safe-mode')
+                .then(response => response.json())
+                .then(data => {
+                    let jokeText = '';
+                    if (data.type === 'single') {
+                        jokeText = data.joke;
+                    } else if (data.type === 'twopart') {
+                        jokeText = `${data.setup} ... ${data.delivery}`;
+                    }
+
+                    setTimeout(() => {
+                        jokeElement.textContent = jokeText;
+                        jokeElement.classList.add("show");
+                        createConfetti(); // Trigger confetti explosion
+
+                        // Play joke sound
+                        document.getElementById('joke-sound').play();
+
+                        // Speak the joke
+                        const utterance = new SpeechSynthesisUtterance(jokeText);
+                        utterance.rate = 1;
+                        speechSynthesis.speak(utterance);
+
+                        // Show visualizer
+                        visualizer.style.display = 'flex';
+                    }, 1000);
+                });
+        }
+
+        // Toggle light/dark mode
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        // On page load, check for stored theme preference
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-mode');
+            }
+        };
+
+        // Confetti effect
+        function createConfetti() {
+            const confettiContainer = document.createElement('div');
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * window.innerWidth}px`;
+                confetti.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                confetti.style.animationDelay = `${Math.random() * 1}s`;
+                confettiContainer.appendChild(confetti);
+            }
+            document.body.appendChild(confettiContainer);
+            setTimeout(() => {
+                confettiContainer.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

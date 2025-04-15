@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #2d2d2d, #141414);
+            color: #f1f1f1;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .light-mode {
+            background: #f1f1f1;
+            color: #000;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00e5ff;
+            margin-bottom: 20px;
+        }
+
+        .dark-light-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00e5ff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .insights {
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .insight-item {
+            margin: 10px 0;
+        }
+
+        #search {
+            width: 100%;
+            padding: 10px;
+            margin: 20px auto;
+            display: block;
+            max-width: 500px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: #f1f1f1;
+        }
+
+        #filter {
+            padding: 10px;
+            margin: 10px 0;
+            background: #333;
+            border: none;
+            border-radius: 5px;
+            color: #f1f1f1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        th {
+            background-color: #00e5ff;
+            color: #000;
+            cursor: pointer;
+        }
+
+        tr:nth-child(odd) td {
+            background-color: #333;
+        }
+
+        .positive {
+            color: #00e676;
+        }
+
+        .negative {
+            color: #ff1744;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        #pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .alert-button {
+            padding: 10px;
+            background: #00e5ff;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .social-buttons button {
+            padding: 10px;
+            margin: 5px;
+            background: #1e1e1e;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .social-buttons button:hover {
+            background: #00e5ff;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="dark-light-toggle" onclick="toggleDarkLightMode()">🌙</button>
+    <h1>Cryptocurrency Dashboard</h1>
+    <input type="text" id="search" placeholder="Search for a cryptocurrency..." oninput="filterTable()" />
+    <select id="filter" onchange="applyFilter()">
+        <option value="market_cap">Market Cap</option>
+        <option value="price">Price</option>
+        <option value="24h_change">24h Change</option>
+    </select>
+
+    <div class="insights">
+        <h2>📊 Market Insights</h2>
+        <div class="insight-item" id="best-performer">Best Performer: Loading...</div>
+        <div class="insight-item" id="worst-performer">Worst Performer: Loading...</div>
+        <div class="insight-item" id="most-volatile">Loading most volatile...</div>
+        <div class="insight-item" id="top-market-cap">Loading top market cap...</div>
+    </div>
+
+    <div class="table-container">
+        <table id="crypto-table">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Name</th>
+                    <th onclick="sortTable(1)">Symbol</th>
+                    <th onclick="sortTable(2)">Price (USD)</th>
+                    <th onclick="sortTable(3)">Market Cap</th>
+                    <th onclick="sortTable(4)">24h Change (%)</th>
+                </tr>
+            </thead>
+            <tbody id="crypto-data"></tbody>
+        </table>
+    </div>
+
+    <div id="pagination"></div>
+
+    <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <button class="alert-button" onclick="setPriceAlert()">Set Price Alert</button>
+
+    <div class="social-buttons">
+        <button onclick="shareOnTwitter()">Share on Twitter</button>
+        <button onclick="shareOnFacebook()">Share on Facebook</button>
+        <button onclick="shareOnTelegram()">Share on Telegram</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let cryptoData = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        function toggleDarkLightMode() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&sparkline=false')
+            .then(res => res.json())
+            .then(data => {
+                cryptoData = data;
+                updateInsights(data);
+                renderTable();
+                renderPagination();
+                renderChart(data);
+            });
+
+        function renderTable() {
+            const tbody = document.getElementById('crypto-data');
+            tbody.innerHTML = '';
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const pageData = cryptoData.slice(start, start + itemsPerPage);
+
+            pageData.forEach(coin => {
+                const row = document.createElement('tr');
+                const changeClass = coin.price_change_percentage_24h > 0 ? 'positive' : 'negative';
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>${coin.symbol.toUpperCase()}</td>
+                    <td>$${coin.current_price.toFixed(2)}</td>
+                    <td>$${coin.market_cap.toLocaleString()}</td>
+                    <td class="${changeClass}">${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(cryptoData.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
+                pagination.appendChild(btn);
+            }
+        }
+
+        function updateInsights(data) {
+            let best = data[0], worst = data[0], mostVolatile = data[0], topMarketCap = data[0];
+
+            data.forEach(coin => {
+                // Find best and worst performers based on 24h change
+                if (coin.price_change_percentage_24h > best.price_change_percentage_24h) best = coin;
+                if (coin.price_change_percentage_24h < worst.price_change_percentage_24h) worst = coin;
+
+                // Find most volatile (highest absolute change)
+                const volatility = Math.abs(coin.price_change_percentage_24h);
+                if (volatility > Math.abs(mostVolatile.price_change_percentage_24h)) mostVolatile = coin;
+
+                // Find top market cap
+                if (coin.market_cap > topMarketCap.market_cap) topMarketCap = coin;
+            });
+
+            // Update DOM with the best/worst performer, most volatile, and top market cap
+            document.getElementById('best-performer').innerHTML = `✅ Best Performer: <strong>${best.name}</strong> — <span class="positive">${best.price_change_percentage_24h.toFixed(2)}%</span>`;
+            document.getElementById('worst-performer').innerHTML = `📉 Worst Performer: <strong>${worst.name}</strong> — <span class="negative">${worst.price_change_percentage_24h.toFixed(2)}%</span>`;
+            document.getElementById('most-volatile').innerHTML = `⚡ Most Volatile: <strong>${mostVolatile.name}</strong> — <span class="positive">${mostVolatile.price_change_percentage_24h.toFixed(2)}%</span>`;
+            document.getElementById('top-market-cap').innerHTML = `💰 Top Market Cap: <strong>${topMarketCap.name}</strong> — <span class="positive">$${topMarketCap.market_cap.toLocaleString()}</span>`;
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const chartData = {
+                labels: data.map(coin => coin.name),
+                datasets: [{
+                    label: 'Price (USD)',
+                    data: data.map(coin => coin.current_price),
+                    borderColor: '#00e5ff',
+                    fill: false,
+                    tension: 0.1
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+            });
+        }
+
+        function filterTable() {
+            const value = document.getElementById('search').value.toLowerCase();
+            const filtered = cryptoData.filter(coin => coin.name.toLowerCase().includes(value));
+            renderFilteredTable(filtered);
+        }
+
+        function renderFilteredTable(filtered) {
+            const tbody = document.getElementById('crypto-data');
+            tbody.innerHTML = '';
+
+            filtered.forEach(coin => {
+                const row = document.createElement('tr');
+                const changeClass = coin.price_change_percentage_24h > 0 ? 'positive' : 'negative';
+                row.innerHTML = `
+                    <td>${coin.name}</td>
+                    <td>${coin.symbol.toUpperCase()}</td>
+                    <td>$${coin.current_price.toFixed(2)}</td>
+                    <td>$${coin.market_cap.toLocaleString()}</td>
+                    <td class="${changeClass}">${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function applyFilter() {
+            const selectedFilter = document.getElementById('filter').value;
+            const sortedData = cryptoData.sort((a, b) => {
+                if (selectedFilter === 'market_cap') {
+                    return b.market_cap - a.market_cap;
+                } else if (selectedFilter === 'price') {
+                    return b.current_price - a.current_price;
+                } else {
+                    return b.price_change_percentage_24h - a.price_change_percentage_24h;
+                }
+            });
+            renderFilteredTable(sortedData);
+        }
+
+        function setPriceAlert() {
+            alert('Price alert feature coming soon!');
+        }
+
+        function shareOnTwitter() {
+            alert('Sharing on Twitter...');
+        }
+
+        function shareOnFacebook() {
+            alert('Sharing on Facebook...');
+        }
+
+        function shareOnTelegram() {
+            alert('Sharing on Telegram...');
+        }
+    </script>
+</body>
+
+</html>

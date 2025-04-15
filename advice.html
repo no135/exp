@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>💡 Ultimate Advice Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        /* General Setup */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111;
+            color: #fff;
+            cursor: url('https://img.icons8.com/ios/452/neon-cursor.png'), auto;
+            overflow: hidden;
+            transition: background-color 0.5s ease, color 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Parallax Background */
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.pixabay.com/photo/2016/11/14/02/44/cat-1822601_960_720.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.4);
+            transform: translateZ(-3px) scale(4);
+            z-index: -3;
+        }
+
+        /* Particle Effect */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: particleMove 3s infinite ease-out;
+        }
+
+        @keyframes particleMove {
+            0% {
+                transform: scale(0) translate3d(0, 0, 0);
+            }
+
+            100% {
+                transform: scale(1) translate3d(100px, 100px, 0);
+            }
+        }
+
+        /* Floating 3D Objects */
+        .floating-3d {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float 10s infinite linear;
+            transform-origin: center;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate3d(0, 0, 0) rotate(0deg);
+            }
+
+            50% {
+                transform: translate3d(100px, 0, 100px) rotate(180deg);
+            }
+
+            100% {
+                transform: translate3d(0, 0, 0) rotate(360deg);
+            }
+        }
+
+        /* 3D Card Effect */
+        .container-3d {
+            perspective: 1500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card-3d {
+            transform-style: preserve-3d;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            z-index: 10;
+        }
+
+        .card-3d:hover {
+            box-shadow: 0 0 150px rgba(0, 255, 255, 1);
+        }
+
+        .card-content {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .cat-icon {
+            font-size: 4rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        .btn-neon {
+            font-size: 1.2rem;
+            padding: 12px 28px;
+            background: transparent;
+            border: 2px solid #00f7ff;
+            color: #00f7ff;
+            text-shadow: 0 0 5px #00f7ff, 0 0 10px #00f7ff;
+            box-shadow: 0 0 25px rgba(0, 247, 255, 1);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-neon:hover {
+            background: #00f7ff;
+            color: #000;
+            box-shadow: 0 0 50px rgba(0, 247, 255, 1);
+            transform: scale(1.1);
+        }
+
+        #advice {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            font-size: 1.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            letter-spacing: 1px;
+            line-height: 1.6;
+        }
+
+        #advice.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Light/Dark Theme Toggle */
+        .light-mode {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .light-mode .parallax-bg {
+            filter: brightness(1);
+        }
+
+        .light-mode .card-3d {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .light-mode .btn-neon {
+            color: #000;
+            background: #00f7ff;
+            border: 2px solid #00f7ff;
+            text-shadow: none;
+        }
+
+        /* Canvas for audio visualizer */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-bg"></div>
+
+    <!-- Particle Effect -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 3D Floating Objects -->
+    <div class="floating-3d" style="top: 10%; left: 30%;"></div>
+    <div class="floating-3d" style="top: 30%; left: 60%;"></div>
+    <div class="floating-3d" style="top: 60%; left: 80%;"></div>
+
+    <!-- 3D Card -->
+    <div class="container-3d">
+        <div class="card-3d tilt-card" id="tilt-card">
+            <div class="card-content">
+                <div class="cat-icon">🐱‍💻</div>
+                <h1 class="fw-bold">Your Ultimate Source of Advice</h1>
+                <p id="advice" class="lead">Click below for some wisdom!</p>
+                <button class="btn btn-neon mt-4" onclick="getAdvice()">✨ Get Advice</button>
+                <button class="btn btn-neon mt-4" onclick="toggleTheme()">🌗 Toggle Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound Effects -->
+    <audio class="sound-effect" id="calm-sound" src="https://www.soundjay.com/button/beep-07.wav"
+        preload="auto"></audio>
+
+    <!-- Canvas for Visualizer -->
+    <canvas id="audio-visualizer"></canvas>
+
+    <script>
+        // Particle system (Improved with particle limit)
+        const maxParticles = 30;
+        let currentParticles = [];
+
+        function createParticle(event) {
+            if (currentParticles.length >= maxParticles) {
+                currentParticles[0].remove();
+                currentParticles.shift();
+            }
+            const particlesContainer = document.getElementById('particles');
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 10 + 5;
+            const posX = event.clientX + (Math.random() - 0.5) * 50;
+            const posY = event.clientY + (Math.random() - 0.5) * 50;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${posX}px`;
+            particle.style.top = `${posY}px`;
+            particlesContainer.appendChild(particle);
+
+            currentParticles.push(particle);
+
+            setTimeout(() => {
+                particle.remove();
+                currentParticles.shift();
+            }, 2000);
+        }
+
+        // 3D tilt effect
+        const tiltCard = document.getElementById("tilt-card");
+        document.addEventListener("mousemove", (e) => {
+            const x = e.clientX / window.innerWidth - 0.5;
+            const y = e.clientY / window.innerHeight - 0.5;
+            tiltCard.style.transform = `rotateY(${x * 15}deg) rotateX(${y * -15}deg) scale(1.05)`;
+            createParticle(e);
+        });
+
+        // Set up the Web Audio API context for the visualizer
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+
+        // Set up the canvas for the visualizer
+        const canvas = document.getElementById("audio-visualizer");
+        const ctx = canvas.getContext("2d");
+
+        // Resize canvas to match the window
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Audio Element
+        const audioElement = document.getElementById("calm-sound");
+
+        // Create audio source from the audio element
+        const source = audioContext.createMediaElementSource(audioElement);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        // Create an array to store frequency data
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        // Function to animate the visualizer
+        function animateVisualizer() {
+            requestAnimationFrame(animateVisualizer);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const barWidth = canvas.width / bufferLength;
+            let barHeight;
+            let x = 0;
+
+            // Loop through the frequency data and draw bars
+            for (let i = 0; i < bufferLength; i++) {
+                barHeight = dataArray[i];
+                ctx.fillStyle = `rgb(${barHeight + 100}, ${250 - barHeight / 2}, ${barHeight})`;
+                ctx.fillRect(x, canvas.height - barHeight - 10, barWidth, barHeight);
+                x += barWidth + 1;
+            }
+        }
+
+        // Play the sound with the visualizer
+        function playSoundWithVisualizer() {
+            audioContext.resume().then(() => {
+                audioElement.play();
+                animateVisualizer();
+            });
+        }
+
+        // Fetch advice and trigger TTS + visualizer
+        function getAdvice() {
+            const adviceElement = document.getElementById("advice");
+            adviceElement.classList.remove("show");
+
+            fetch('https://api.adviceslip.com/advice')
+                .then(response => response.json())
+                .then(data => {
+                    let adviceText = data.slip.advice;
+
+                    setTimeout(() => {
+                        adviceElement.textContent = `"${adviceText}"`;
+                        adviceElement.classList.add("show");
+
+                        // Play calm sound and visualizer
+                        playSoundWithVisualizer();
+
+                        // Speak the advice
+                        const utterance = new SpeechSynthesisUtterance(adviceText);
+                        utterance.rate = 1;
+                        speechSynthesis.speak(utterance);
+                    }, 1000);
+                });
+        }
+
+        // Toggle light/dark mode
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+    </script>
+</body>
+
+</html>
